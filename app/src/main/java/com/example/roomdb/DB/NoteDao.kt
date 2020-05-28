@@ -10,7 +10,7 @@ interface NoteDao{
     fun  addNote(note: Note)
 
     @Query("SELECT * FROM note")
-    fun getAllNotes()
+    fun getAllNotes(): List<Note>
 
     @Insert
     fun addMultipleNotes (vararg note: Note)

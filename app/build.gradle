@@ -3,6 +3,10 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 // apply the safeargs plugin
 apply plugin: "androidx.navigation.safeargs"
+// apply plugin kotlin-kapt to implement the database
+
+apply plugin: 'kotlin-kapt'
+
 
 android {
     compileSdkVersion 29
@@ -42,7 +46,7 @@ dependencies {
 
     // add RoomDB Dependency and the annotation processor
     implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
     // Navigation dependency for Kotlin
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
