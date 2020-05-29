@@ -12,11 +12,12 @@ import com.example.roomdb.DB.NoteDatabase
 
 import com.example.roomdb.R
 import kotlinx.android.synthetic.main.fragment_add_new.*
+import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass.
  */
-class AddNewFragment : Fragment() {
+class AddNewFragment : BaseFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,23 +45,18 @@ class AddNewFragment : Fragment() {
                 note.requestFocus()
                 return@setOnClickListener
             }
-            val note= Note(noteTitle,noteBody)
-            saveNote(note)
-        }
-    }
-    private fun saveNote(note: Note){
-        class SaveNote: AsyncTask<Void, Void, Void>(){
-            override fun doInBackground(vararg params: Void?): Void? {
-                NoteDatabase(requireActivity()).getNoteDao().addNote(note)
-                return null
+            launch {
+                val note= Note(noteTitle,noteBody)
+
+                context?.let {
+                    NoteDatabase(it).getNoteDao().addNote(note)
+                    it.toast("NOte Saved")
+                }
             }
 
-            override fun onPostExecute(result: Void?) {
-                super.onPostExecute(result)
-                Toast.makeText(activity, "Note Saved", Toast.LENGTH_LONG).show()
-            }
+
         }
-        SaveNote().execute()
     }
+
 
 }
