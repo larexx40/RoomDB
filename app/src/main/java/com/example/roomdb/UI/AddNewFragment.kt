@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.Navigation
 import com.example.roomdb.DB.Note
 import com.example.roomdb.DB.NoteDatabase
 
@@ -17,7 +18,11 @@ import kotlinx.coroutines.launch
 /**
  * A simple [Fragment] subclass.
  */
+
 class AddNewFragment : BaseFragment() {
+
+    // this variable holds edited value from the database
+    private var editedNote: Note? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,10 +35,17 @@ class AddNewFragment : BaseFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        fABSave.setOnClickListener{
-            val noteTitle = title.text.toString().trim()
-            val noteBody = note.text.toString().trim()
+        arguments?.let {
+            editedNote= AddNewFragmentArgs.fromBundle(it).note
+            title.setText(editedNote?.title)
+            editTextNote.setText(editedNote?.note)
+        }
 
+        fABSave.setOnClickListener{view->
+            val noteTitle = title.text.toString().trim()
+            val noteBody = editTextNote.text.toString().trim()
+
+            //validates the input text box
             if(noteTitle.isEmpty()){
                 title.error= "Title Required"
                 title.requestFocus()
@@ -41,16 +53,31 @@ class AddNewFragment : BaseFragment() {
             }
 
             if(noteBody.isEmpty()){
-                note.error= "Title Required"
-                note.requestFocus()
+                editTextNote.error= "Title Required"
+                editTextNote.requestFocus()
                 return@setOnClickListener
             }
             launch {
-                val note= Note(noteTitle,noteBody)
 
                 context?.let {
-                    NoteDatabase(it).getNoteDao().addNote(note)
-                    it.toast("NOte Saved")
+                    // it holds new input to be stored in DB
+                    val newnote= Note(noteTitle,noteBody)
+
+                    //so if editedNote=null(you did not click to edit value in DB)
+                   //uses addNote() from our Dao to save fresh data
+                    if (editedNote==null){
+                        NoteDatabase(it).getNoteDao().addNote(newnote)
+                        it.toast("Note Saved")
+                    }else{
+                        // editedNote is not null i.e you want to save a value that has just been edited
+                        //uses updateNote() from our DAO to update edited data
+                        newnote.id = editedNote!!.id
+                        NoteDatabase(it).getNoteDao().updateNote(newnote)
+                        it.toast("Note Updated")
+                    }
+                    
+                    val action = AddNewFragmentDirections.actionSaveNote()
+                    Navigation.findNavController(view).navigate(action)
                 }
             }
 
