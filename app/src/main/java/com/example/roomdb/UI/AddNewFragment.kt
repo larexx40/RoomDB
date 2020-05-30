@@ -1,11 +1,10 @@
 package com.example.roomdb.UI
 
+import android.app.AlertDialog
 import android.os.AsyncTask
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.Navigation
 import com.example.roomdb.DB.Note
@@ -28,6 +27,8 @@ class AddNewFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        setHasOptionsMenu(true)
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_add_new, container, false)
     }
@@ -85,5 +86,33 @@ class AddNewFragment : BaseFragment() {
         }
     }
 
+    private fun deleteNote(){
+        // Working with Dialog Box
+        AlertDialog.Builder(context).apply {
+            setTitle("Are you sure?")
+            setMessage("You cannot undo this operation")
+            setPositiveButton("Yes"){_, _ ->
+                // use lunch to call the coroutine to perform any RoomDB activities inside lunch
+                launch {
+                    NoteDatabase(context).getNoteDao().deleteNote(editedNote!!)
+                    val action = AddNewFragmentDirections.actionSaveNote()
+                    Navigation.findNavController(requireView()).navigate(action)
+                }
+            }
+            setNegativeButton("NO"){_, _ ->}
+        }.create().show()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.deleteMenu-> if (editedNote != null) deleteNote() else context?.toast("Cannot Delete")
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu, menu)
+    }
 
 }
